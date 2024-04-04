@@ -6,6 +6,8 @@ from enum import Enum as PyEnum
 Base = declarative_base()
 
 
+
+
 class Empresa(Base):
     __tablename__ = 'empresas'
     id_empresa = Column(Integer, primary_key=True, autoincrement=True)
@@ -17,8 +19,8 @@ class Empresa(Base):
     estado = Column(Enum('Activo', 'Inactivo'), default='Activo')
     create_at = Column(String, server_default=func.now(), nullable=False)
     update_at = Column(String, server_default=func.now(),
-                       onupdate=func.now(), nullable=False)
-
+                       onupdate=func.now(), nullable=False)  
+   
 
 class Servicio(Base):
     __tablename__ = 'servicios'
