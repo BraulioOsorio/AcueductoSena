@@ -3,11 +3,13 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
-import pypandoc
 from models import Documento, Usuario, Empresa
 from funciones import *
 from str_aleatorio import generar_random_id
 import bcrypt
+from docx import Document  # Importar para manejar archivos DOCX
+from reportlab.lib.pagesizes import letter  # Importar para manejar páginas
+from reportlab.pdfgen import canvas  # Importar para generar PDFs
 
 SUPER_ADMIN = "SuperAdmin"
 ADMIN = "Admin"
@@ -20,8 +22,31 @@ app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 
 template = Jinja2Templates(directory="public/templates")
 
+def docx_to_pdf(docx_path, pdf_path):
+    # Cargar el archivo DOCX
+    doc = Document(docx_path)
+
+    # Crear un PDF
+    c = canvas.Canvas(pdf_path, pagesize=letter)
+    width, height = letter
+
+    # Posición inicial
+    y = height - 40  # Iniciar desde la parte superior
+
+    # Leer el contenido del DOCX y escribirlo en el PDF
+    for para in doc.paragraphs:
+        text = para.text.strip()
+        if text:  # Solo agregar si hay texto
+            c.drawString(40, y, text)
+            y -= 12  # Mover hacia abajo para la próxima línea
+            if y < 40:  # Si alcanzamos el fondo de la página
+                c.showPage()  # Crear una nueva página
+                y = height - 40  # Restablecer posición
+
+    c.save()
+
 def manejarDocumentos(nombre_documento, datos, nit, id_usuario, db, id_servicio):
-    archivo = f'public/dist/ArchivosDescarga/{nombre_documento}.docx'
+    archivo = 'public/dist/ArchivosDescarga/' + nombre_documento + '.docx'
     
     # Modificar el documento
     documento_modificado = reemplazar_texto(archivo, datos)
@@ -31,8 +56,7 @@ def manejarDocumentos(nombre_documento, datos, nit, id_usuario, db, id_servicio)
     # Convertir a PDF
     archivo_pdf = f'public/dist/ArchivosDescarga/Generados/{nombre_documento}_{nit}.pdf'
     try:
-        # Convertir usando pypandoc
-        pypandoc.convert_file(docx_path, 'pdf', outputfile=archivo_pdf)
+        docx_to_pdf(docx_path, archivo_pdf)  # Convertir usando la nueva función
     except Exception as e:
         print("Error al convertir a PDF:", e)
         raise HTTPException(status_code=500, detail="Error al convertir el documento a PDF.")
