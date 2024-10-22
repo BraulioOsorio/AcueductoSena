@@ -18,7 +18,6 @@ from cruds.ReunionesCrud import obtenerReuAdmin
 from fastapi.responses import JSONResponse, RedirectResponse
 from models import Token, Usuario, Empresa, Vivienda, Reunion
 from sqlalchemy.orm import Session
-from docx2pdf import convert
 import PyPDF2
 from docx import Document
 from docx.shared import Inches
