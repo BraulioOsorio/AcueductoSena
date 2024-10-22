@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
-from docx2pdf import convert  # Cambiar a docx2pdf
+import pypandoc
 from models import Documento, Usuario, Empresa
 from funciones import *
 from str_aleatorio import generar_random_id
@@ -21,7 +21,7 @@ app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 template = Jinja2Templates(directory="public/templates")
 
 def manejarDocumentos(nombre_documento, datos, nit, id_usuario, db, id_servicio):
-    archivo = 'public/dist/ArchivosDescarga/' + nombre_documento + '.docx'
+    archivo = f'public/dist/ArchivosDescarga/{nombre_documento}.docx'
     
     # Modificar el documento
     documento_modificado = reemplazar_texto(archivo, datos)
@@ -31,7 +31,8 @@ def manejarDocumentos(nombre_documento, datos, nit, id_usuario, db, id_servicio)
     # Convertir a PDF
     archivo_pdf = f'public/dist/ArchivosDescarga/Generados/{nombre_documento}_{nit}.pdf'
     try:
-        convert(docx_path, archivo_pdf)  # Convertir usando docx2pdf
+        # Convertir usando pypandoc
+        pypandoc.convert_file(docx_path, 'pdf', outputfile=archivo_pdf)
     except Exception as e:
         print("Error al convertir a PDF:", e)
         raise HTTPException(status_code=500, detail="Error al convertir el documento a PDF.")
