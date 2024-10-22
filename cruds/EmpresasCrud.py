@@ -17,7 +17,6 @@ from funciones import *
 from models import Empresa
 
 
-
 SUPER_ADMIN = "SuperAdmin"
 ADMIN = "Admin"
 ESTADO = "Activo"
